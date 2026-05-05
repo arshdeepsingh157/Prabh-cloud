@@ -1187,99 +1187,12 @@ def health():
 
 
 # ─────────────────────────────────────────────────────────
-# DATABASE SEED (development only)
-# ─────────────────────────────────────────────────────────
-
-def seed_database():
-    """Seed with sample data for development."""
-    if User.query.count():
-        return  # Already seeded
-
-    print("🌱 Seeding database...")
-
-    # Admin user (bizcrmapp)
-    admin = User(username="admin", email="admin@bizcrmapp.com", role="admin")
-    admin.set_password("Admin@1234")
-    # Admin user (crm)
-    admin_crm = User(username="admin_crm", email="admin@crm.com", role="admin")
-    admin_crm.set_password("Admin@1234")
-    staff = User(username="staff1", email="staff@bizcrmapp.com", role="staff")
-    staff.set_password("Staff@1234")
-    db.session.add_all([admin, admin_crm, staff])
-    db.session.flush()
-
-    # Customers
-    customers_data = [
-        ("Priya",    "Sharma",  "priya@email.com",   "9876543210", "Dehradun, UK", 14800, 12),
-        ("Rahul",    "Verma",   "rahul@email.com",   "9812345678", "Delhi",         8200,  7),
-        ("Anjali",   "Singh",   "anjali@email.com",  "9765432101", "Haridwar, UK", 22500, 18),
-        ("Mohammed", "Khan",    "khan@email.com",    "9900112233", "Dehradun, UK",  3400,  3),
-        ("Sunita",   "Negi",    "sunita@email.com",  "9811122334", "Mussoorie, UK", 6700,  5),
-    ]
-    custs = []
-    for fn, ln, email, phone, addr, spent, visits in customers_data:
-        c = Customer(fname=fn, lname=ln, email=email, phone=phone,
-                     address=addr, total_spent=spent, visits=visits, created_by=admin.id)
-        db.session.add(c)
-        custs.append(c)
-    db.session.flush()
-
-    # Products
-    products_data = [
-        ("Blue Denim Jacket",  "Clothing",     1299, 32, 10, "🧥", "Classic blue denim jacket",     45),
-        ("iPhone Case Pro",    "Accessories",   499,  7, 10, "📱", "Protective iPhone case",        88),
-        ("White Sneakers",     "Footwear",     1899, 15,  8, "👟", "Classic white sneakers",        31),
-        ("Cotton T-Shirt",     "Clothing",      349,  3, 10, "👕", "100% cotton t-shirt",          120),
-        ("Wireless Earbuds",   "Electronics",  2499, 20,  5, "🎧", "Bluetooth wireless earbuds",    55),
-        ("Leather Wallet",     "Accessories",   799, 42, 10, "👛", "Genuine leather bifold wallet", 67),
-        ("Cargo Shorts",       "Clothing",      699,  5,  8, "🩳", "Multi-pocket cargo shorts",     29),
-        ("Running Shoes",      "Footwear",     2199, 18,  8, "👟", "Lightweight running shoes",     43),
-    ]
-    prods = []
-    for name, cat, price, stock, low, img, desc, sold in products_data:
-        p = Product(name=name, category=cat, price=price, stock=stock,
-                    low_alert=low, image_url=img, description=desc, sold=sold)
-        db.session.add(p)
-        prods.append(p)
-    db.session.flush()
-
-    # Sales
-    sales_data = [
-        (custs[0].id, prods[0].id, 2, "UPI",       "2025-01-15"),
-        (custs[1].id, prods[3].id, 3, "Cash",      "2025-01-18"),
-        (custs[2].id, prods[4].id, 1, "Card",      "2025-01-20"),
-        (custs[0].id, prods[1].id, 2, "UPI",       "2025-02-02"),
-        (custs[3].id, prods[2].id, 1, "Cash",      "2025-02-10"),
-        (custs[2].id, prods[5].id, 2, "Card",      "2025-02-14"),
-        (custs[4].id, prods[3].id, 4, "UPI",       "2025-03-05"),
-        (custs[1].id, prods[6].id, 2, "Cash",      "2025-03-12"),
-        (custs[2].id, prods[0].id, 1, "UPI",       "2025-03-18"),
-        (custs[0].id, prods[7].id, 1, "NetBanking","2025-04-01"),
-    ]
-    for cid, pid, qty, method, date_str in sales_data:
-        prod = next(p for p in prods if p.id == pid)
-        sale = Sale(customer_id=cid, product_id=pid, qty=qty,
-                    unit_price=prod.price, total=prod.price*qty,
-                    method=method,
-                    sale_date=datetime.datetime.strptime(date_str, "%Y-%m-%d").date(),
-                    created_by=admin.id)
-        db.session.add(sale)
-
-    db.session.commit()
-    print("✅ Database seeded successfully!")
-    print("   Admin:  admin@crm.com / Admin@1234")
-    print("   Admin:  admin@bizcrmapp.com / Admin@1234")
-    print("   Staff:  staff@bizcrmapp.com / Staff@1234")
-
-
-# ─────────────────────────────────────────────────────────
 # ENTRY POINT
 # ─────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
-        seed_database()
 
     print("""
 ╔══════════════════════════════════════════════════════╗
@@ -1296,10 +1209,6 @@ if __name__ == "__main__":
 ║    POST /api/chat                                    ║
 ║    GET  /api/dashboard/stats                         ║
 ║    GET  /api/health                                  ║
-╠══════════════════════════════════════════════════════╣
-║  Credentials:                                        ║
-║    admin@bizcrmapp.com / Admin@1234                  ║
-║    staff@bizcrmapp.com / Staff@1234                  ║
 ╚══════════════════════════════════════════════════════╝
     """)
 
